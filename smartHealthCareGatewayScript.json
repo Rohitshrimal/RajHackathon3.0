@@ -1,0 +1,319 @@
+[
+    {
+        "id": "4e1134a6.54f45c",
+        "type": "tab",
+        "label": "Smart Healthcare ",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "add85180.73e8e",
+        "type": "exec",
+        "z": "4e1134a6.54f45c",
+        "command": "sudo python ul.py",
+        "addpay": true,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "oldrc": false,
+        "name": "UlterSonic Script",
+        "x": 277,
+        "y": 46.5,
+        "wires": [
+            [
+                "e07bf8ce.f7b048"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "e07bf8ce.f7b048",
+        "type": "function",
+        "z": "4e1134a6.54f45c",
+        "name": "Refrective Index Extraction",
+        "func": "ref_index= JSON.parse(msg.payload)  ;\n\nif(flow.get(\"sd\"))\n{\n    if(ref_index < .4*flow.get(\"index\"))\n    {\n        msg.reset = \"true\"\n    }\n}\nelse\n{\n    flow.set(\"index\",ref_index);\n}\n\nmsg.payload = { \n    \"ref_index\":ref_index,\n    \"con\": flow.get(\"sd\"),\n    \"org\" :flow.get(\"index\")\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 461,
+        "y": 141,
+        "wires": [
+            [
+                "769f7aaa.f58af4",
+                "7369b4eb.ce39bc",
+                "927c609e.aa03"
+            ]
+        ]
+    },
+    {
+        "id": "769f7aaa.f58af4",
+        "type": "function",
+        "z": "4e1134a6.54f45c",
+        "name": "Setting global Standard RF Index",
+        "func": "flow.set(\"sd\",\"bye\");\nflow.set(\"start_time\",Date.now());\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 633,
+        "y": 42,
+        "wires": [
+            [
+                "e07bf8ce.f7b048"
+            ]
+        ]
+    },
+    {
+        "id": "c7be3ac.d75c3c8",
+        "type": "trigger",
+        "z": "4e1134a6.54f45c",
+        "op1": "true",
+        "op2": "true",
+        "op1type": "bool",
+        "op2type": "bool",
+        "duration": "2",
+        "extend": false,
+        "units": "s",
+        "reset": "",
+        "name": "",
+        "x": 159,
+        "y": 129,
+        "wires": [
+            [
+                "add85180.73e8e"
+            ]
+        ]
+    },
+    {
+        "id": "7369b4eb.ce39bc",
+        "type": "function",
+        "z": "4e1134a6.54f45c",
+        "name": "Stopping Trigger",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 290,
+        "y": 241,
+        "wires": [
+            [
+                "c7be3ac.d75c3c8",
+                "e1243add.b78568"
+            ]
+        ]
+    },
+    {
+        "id": "e1243add.b78568",
+        "type": "function",
+        "z": "4e1134a6.54f45c",
+        "name": "Building Data Points",
+        "func": "if(msg.reset){\n    msg.reset=\"false\";\nflow.set(\"alert_time\",Date.now());\nmsg.payload ={ \n    \"IV_infusion_id\":\"IV-infusion_1\",\n    \"start_time\":flow.get(\"start_time\"),\n    \"alert_time\":flow.get(\"alert_time\"),\n    \"volume\": flow.get(\"volume\")\n}\n\nmsg.payload = msg.payload;\nreturn msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 435,
+        "y": 293,
+        "wires": [
+            [
+                "80388bf9.4ec988",
+                "3834fa34.476a86",
+                "ddee6df5.1c42a"
+            ]
+        ]
+    },
+    {
+        "id": "3834fa34.476a86",
+        "type": "http request",
+        "z": "4e1134a6.54f45c",
+        "name": "Sending to Cloud",
+        "method": "POST",
+        "ret": "txt",
+        "url": "http://rajhackathon3.eu-gb.mybluemix.net/value2",
+        "tls": "",
+        "x": 668,
+        "y": 390,
+        "wires": [
+            [
+                "29f2d60d.dcf13a",
+                "f472bc6f.b99aa"
+            ]
+        ]
+    },
+    {
+        "id": "80388bf9.4ec988",
+        "type": "debug",
+        "z": "4e1134a6.54f45c",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "true",
+        "x": 621,
+        "y": 301,
+        "wires": []
+    },
+    {
+        "id": "29f2d60d.dcf13a",
+        "type": "debug",
+        "z": "4e1134a6.54f45c",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 544,
+        "y": 439,
+        "wires": []
+    },
+    {
+        "id": "927c609e.aa03",
+        "type": "debug",
+        "z": "4e1134a6.54f45c",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 567,
+        "y": 211,
+        "wires": []
+    },
+    {
+        "id": "d9b391fa.cd246",
+        "type": "ui_button",
+        "z": "4e1134a6.54f45c",
+        "name": "",
+        "group": "4ebf810c.7a878",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Set IV Infusion Volume",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "date",
+        "topic": "",
+        "x": 167,
+        "y": 395,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d58d1437.4de9d8",
+        "type": "ui_form",
+        "z": "4e1134a6.54f45c",
+        "name": "",
+        "label": "",
+        "group": "4ebf810c.7a878",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "Set IV Infusion Volume",
+                "value": "volume",
+                "type": "number",
+                "required": true
+            }
+        ],
+        "formValue": {
+            "volume": ""
+        },
+        "payload": "",
+        "topic": "",
+        "x": 84,
+        "y": 290,
+        "wires": [
+            [
+                "c7be3ac.d75c3c8",
+                "1c9746a.9ed6cb9"
+            ]
+        ]
+    },
+    {
+        "id": "1c9746a.9ed6cb9",
+        "type": "function",
+        "z": "4e1134a6.54f45c",
+        "name": "Setting Volume of IV Infusion",
+        "func": "flow.set(\"volume\",msg.payload.volume);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 274,
+        "y": 367,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ddee6df5.1c42a",
+        "type": "ui_toast",
+        "z": "4e1134a6.54f45c",
+        "position": "top right",
+        "displayTime": "120",
+        "highlight": "",
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "topic": "Threshold Crossed",
+        "name": "",
+        "x": 675,
+        "y": 341,
+        "wires": []
+    },
+    {
+        "id": "3498f6ce.a1ce2a",
+        "type": "rpi-gpio out",
+        "z": "4e1134a6.54f45c",
+        "name": "",
+        "pin": "11",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "x": 616,
+        "y": 507,
+        "wires": []
+    },
+    {
+        "id": "f472bc6f.b99aa",
+        "type": "function",
+        "z": "4e1134a6.54f45c",
+        "name": "Triggering LED",
+        "func": "msg.payload = 1;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 375,
+        "y": 523,
+        "wires": [
+            [
+                "f068ae0e.c792a",
+                "3498f6ce.a1ce2a"
+            ]
+        ]
+    },
+    {
+        "id": "f068ae0e.c792a",
+        "type": "debug",
+        "z": "4e1134a6.54f45c",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 669,
+        "y": 567,
+        "wires": []
+    },
+    {
+        "id": "4ebf810c.7a878",
+        "type": "ui_group",
+        "z": "",
+        "name": "Smart Health Care",
+        "tab": "9721319.e40d4d",
+        "disp": true,
+        "width": "6"
+    },
+    {
+        "id": "9721319.e40d4d",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Home",
+        "icon": "dashboard",
+        "order": 1
+    }
+]
